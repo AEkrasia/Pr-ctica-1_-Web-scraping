@@ -1,0 +1,36 @@
+import csv
+import requests
+from lxml import html
+from bs4 import BeautifulSoup
+
+page_inicial = "https://elchapuzasinformatico.com/"
+firstpage = requests.get(page_inicial)
+tree = html.fromstring(firstpage.text)
+numpage = int(float(tree.xpath('//*[@id="main"]/div/div/nav/div/a[4]/text()')[0])*1000)
+
+with open('Dataset.csv', 'w', encoding = "utf-8") as csvfile:
+    writer = csv.writer(csvfile)
+
+    for i in range(1, 20):
+
+        if i > 1:
+            url = "%spage/%d/" % (page_inicial, i)
+        else:
+            url = page_inicial
+
+        page = requests.get(url)
+
+        soup = BeautifulSoup(page.text, "html.parser")
+
+        entradas = soup.find_all(class_='post-content')
+            
+        for entrada in entradas:
+            titulo = str(entrada.find(class_='entry-title').getText())
+            metadatos = entrada.find(class_='entry-meta')
+            autor = str(metadatos.find(class_='post-author-name').getText())
+            fecha = str(metadatos.find(class_='post-date').getText())
+
+            datos = [titulo, autor, fecha]
+            print (datos)            
+            
+            writer.writerows([datos])
