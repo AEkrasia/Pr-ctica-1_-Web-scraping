@@ -1,0 +1,22 @@
+from lxml import html
+import requests
+from bs4 import BeautifulSoup
+
+page = requests.get("https://elchapuzasinformatico.com/")
+tree = html.fromstring(page.text)
+numpage = int(float(tree.xpath('//*[@id="main"]/div/div/nav/div/a[4]/text()')[0])*1000)
+
+print (numpage)
+
+soup = BeautifulSoup(page.text, "html.parser")
+
+entradas = soup.find(class_='post-content')
+
+titulo = entradas.find(class_='entry-title')
+metadatos = entradas.find(class_='entry-meta')
+autor = metadatos.find(class_='post-author-name')
+fecha = metadatos.find(class_='post-date')
+
+print (titulo.text)
+print (autor.text)
+print (fecha.string)
