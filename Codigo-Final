@@ -1,0 +1,58 @@
+#Agustín Torres Nieto
+#2017/11/13
+#Cabecera
+import csv
+import requests
+from lxml import html
+from bs4 import BeautifulSoup
+
+# Definimos la página web
+page_inicial = "https://elchapuzasinformatico.com/"
+
+# Hayamos cual es el numero de paginas totales del blog por si quisieramos
+# descargar todas las entradas (en esta practica solo se hace hasta la pagina 20)
+firstpage = requests.get(page_inicial)
+tree = html.fromstring(firstpage.text)
+numpage = int(float(tree.xpath('//*[@id="main"]/div/div/nav/div/a[4]/text()')[0])*1000)
+
+#Creamos nuestro archivo csv
+with open('Dataset.csv', 'w', encoding = "utf-8") as csvfile:
+    writer = csv.writer(csvfile)
+
+    #Bucle para recorre las 20 paginas mas recientes
+    for i in range(1, 20):
+
+        #Hacemos evolucionar las pagina a cargar
+        if i > 1:
+            url = "%spage/%d/" % (page_inicial, i)
+        else:
+            url = page_inicial
+
+        #Petición a la web
+        page = requests.get(url)
+
+        #Pasamos el continido de la web a un objeto BeautifulSoup()
+        soup = BeautifulSoup(page.text, "html.parser")
+
+        #Buscamos todas las class donde estan las entradas
+        entradas = soup.find_all(class_='post-content')
+
+        #En cada entrada buscamos el titulo, autor y la fecha    
+        for entrada in entradas:
+            titulo = str(entrada.find(class_='entry-title').getText())
+            metadatos = entrada.find(class_='entry-meta')
+            autor = str(metadatos.find(class_='post-author-name').getText())
+            fecha = str(metadatos.find(class_='post-date').getText())
+
+            #Almacenamos los datos en una lista
+            datos = [titulo, autor, fecha]
+
+            #Imprimimos los datos
+            print (datos)
+            
+            #Guardamo s los datos en un archivo CSV
+            writer.writerows([datos])
+
+
+
+print("Fin")
