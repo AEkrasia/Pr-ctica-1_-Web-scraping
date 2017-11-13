@@ -1,0 +1,32 @@
+from lxml import html
+import requests
+from bs4 import BeautifulSoup
+
+page_inicial = "https://elchapuzasinformatico.com/"
+firstpage = requests.get(page_inicial)
+tree = html.fromstring(firstpage.text)
+numpage = int(float(tree.xpath('//*[@id="main"]/div/div/nav/div/a[4]/text()')[0])*1000)
+
+
+
+for i in range(1, 10):
+
+    if i > 1:
+        url = "%spage/%d/" % (page_inicial, i)
+    else:
+        url = page_inicial
+
+    page = requests.get(url)
+
+    soup = BeautifulSoup(page.text, "html.parser")
+
+    entradas = soup.find_all(class_='post-content')
+        
+    for entrada in entradas:
+        titulo = entrada.find(class_='entry-title')
+        metadatos = entrada.find(class_='entry-meta')
+        autor = metadatos.find(class_='post-author-name')
+        fecha = metadatos.find(class_='post-date')
+
+        print (titulo.text, autor.text, fecha.string)
+
